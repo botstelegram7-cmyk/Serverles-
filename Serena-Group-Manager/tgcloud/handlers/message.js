@@ -313,7 +313,7 @@ async function showStatus(message) {
   } else {
     lines.push('Add the bot to a group and promote it to admin to use moderation commands.');
   }
-  return send(chatId, lines.join('\\n'), backMenu);
+  return send(chatId, lines.join('\n'), backMenu);
 }
 
 async function showAdmins(chatId) {
