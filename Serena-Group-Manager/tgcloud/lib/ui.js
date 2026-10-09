@@ -29,6 +29,8 @@ export const HELP_TEXT =
   '/start — Open the menu\n' +
   '/help — Show this guide\n' +
   '/id — Show chat and your user ID\n' +
+  '  '/version — Show bot version\n' +
+  '  '/status — Check bot permissions and group settings\n' +
   '/admins — List group admins\n' +
   '/rules — View group rules\n\n' +
   '<b>Admin commands</b> (reply to a member’s message)\n' +
