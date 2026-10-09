@@ -37,7 +37,11 @@ export const ABOUT_TEXT =
   `I can show this welcome screen, explain commands, display your message stats,\n` +
   `and echo text messages. Use /help to see the available commands.`;
 
-export const VERSION_TEXT =\n  `ℹ️ <b>Bot version</b>\\n\\n` +\n  `<b>Version:</b> 1.0.0`;\n\nexport function statsMessage(user, count) {
+export const VERSION_TEXT =
+  `ℹ️ <b>Bot version</b>\n\n` +
+  `<b>Version:</b> 1.0.0`;
+
+export function statsMessage(user, count) {
   const name = user?.first_name ? escapeHtml(user.first_name) : 'You';
   return (
     `📊 <b>Your stats</b>\n\n` +
