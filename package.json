@@ -1,0 +1,23 @@
+{
+  "name": "telegram-serverless-welcome-bot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A professional Telegram Serverless bot that greets users on /start, responds to commands, and stores state in Telegram's built-in SQLite database.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "deploy": "tgcloud push",
+    "push": "tgcloud push",
+    "migrate": "tgcloud migrate",
+    "status": "tgcloud status",
+    "diff": "tgcloud diff",
+    "run": "tgcloud run",
+    "webhook": "tgcloud webhook",
+    "login": "tgcloud login"
+  },
+  "devDependencies": {
+    "@tgcloud/cli": "^0.2.0"
+  }
+}
