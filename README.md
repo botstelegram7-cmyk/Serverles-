@@ -1,173 +1,135 @@
-# Telegram Serverless Welcome Bot
+# Telegram Serverless Bot Projects
 
-> A professional Telegram bot that runs entirely on Telegram's own infrastructure —
-> no VPS, no containers, no webhook configuration. Built with the official
-> [Telegram Serverless](https://core.telegram.org/bots/serverless) platform (`tgcloud`).
+Production-minded starter code and documentation for bots running on [Telegram Serverless](https://blogfork.telegram.org/bots/serverless) with the `@tgcloud/cli`.
 
-When a user opens the bot and taps **Start** (or sends `/start`), the bot
-replies with a rich welcome message, an inline menu, and persists the user in
-its built-in SQLite database. It also supports `/help`, `/about`, `/stats`,
-button callbacks, and echoes other messages while counting them per user.
+This repository contains **two independently deployable projects**. Each project has its own `package.json`, `tgcloud/` source tree, CLI state and deployment lifecycle.
 
----
+## Projects
 
-## ✨ Features
+### 1. Telegram Serverless Welcome Bot — repository root
 
-- 🎬 **/start welcome screen** — rich HTML greeting addressed to the user, with an inline keyboard menu.
-- 🛠 **/help**, **/about**, **/stats** commands — each with its own view and a ⬅️ Back button.
-- 🔘 **Inline keyboard callbacks** — actions routed through `handlers/callback_query.js`.
-- 🗄 **Built-in SQLite database** — `users` table tracks every visitor, their language, and their message count.
-- 🔁 **Echo mode** — any non-command message is echoed back with a counter update.
-- ⚡ **Zero infrastructure** — deploys to Telegram's cloud with one command.
+A starter bot demonstrating message handlers, inline keyboards, command routing and persistent SQLite-backed user statistics.
 
----
+- `/start`, `/help`, `/about`, `/stats`, `/version`
+- Inline keyboard callbacks
+- Persistent user records and message counts
+- A small, readable codebase for learning Serverless handlers
 
-## 📁 Project layout
+Start here: the root `package.json` and `tgcloud/` folder.
 
+### 2. Serena Group Manager — `Serena-Group-Manager/`
+
+A separate group administration bot with moderation commands, persistent rules and warning records, welcome settings, admin tools and a button-based help menu.
+
+- Ban, unban, kick, timed mute and unmute
+- Warnings, warning history and clearing warnings
+- Message purge and pin management
+- Group rules and welcome-message settings
+- Admin list, chat ID, version and permission status
+- Dedicated setup guide: [Serena Group Manager README](Serena-Group-Manager/README.md)
+- Android setup and deploy instructions: [deployment termux.md](Serena-Group-Manager/deployment%20termux.md)
+
+**The two projects are not deployed together.** Run CLI commands from the project folder you intend to deploy and log each project into its own Telegram Serverless bot.
+
+## Quick start
+
+### Requirements
+
+- Node.js 18 or newer and npm
+- Git
+- A Telegram bot created with [@BotFather](https://t.me/BotFather)
+- Telegram Serverless enabled for that bot
+- The bot's **CLI Access token** from BotFather → your bot → Serverless → CLI Access
+
+The CLI Access token is different from the regular Telegram Bot API token. Never commit either secret.
+
+### Deploy the Welcome Bot (repository root)
+
+```bash
+git clone https://github.com/botstelegram7-cmyk/Serverles-.git
+cd Serverles-
+npm install
+npx tgcloud login
+npx tgcloud status
+npx tgcloud push
+npx tgcloud migrate
+npx tgcloud webhook
 ```
+
+### Deploy Serena Group Manager
+
+From the repository root:
+
+```bash
+cd Serena-Group-Manager
+npm install
+npx tgcloud login
+npx tgcloud status
+npx tgcloud push
+npx tgcloud migrate
+npx tgcloud webhook
+```
+
+On first deployment, follow the CLI prompts and review migration changes before confirming. Do not run these commands from the wrong project folder.
+
+## Documentation
+
+| Guide | Purpose |
+|---|---|
+| [Telegram Serverless guide](docs/TELEGRAM_SERVERLESS_GUIDE.md) | Platform model, features, runtime, database, Mini Apps, deployment lifecycle and security |
+| [Terminal deployment guide](docs/TERMINAL_DEPLOYMENT.md) | Termux, Linux, macOS and Windows PowerShell commands |
+| [tgcloud SDK reference](docs/tgcloud-sdk.md) | Database, Bot API, HTTP, files and runtime API details |
+| [Serena Group Manager guide](Serena-Group-Manager/README.md) | Moderation commands, permissions and bot usage |
+| [Serena Termux guide](Serena-Group-Manager/deployment%20termux.md) | Serena-specific install, update, redeploy and troubleshooting |
+| [AGENTS.md](AGENTS.md) | Project layout and implementation rules |
+
+## Project layout
+
+```text
 .
-├── tgcloud/                     # Everything the platform runs lives here
+├── tgcloud/                       # Welcome Bot runtime modules
 │   ├── handlers/
-│   │   ├── message.js           # New incoming messages (including /start)
-│   │   └── callback_query.js    # Inline keyboard button presses
 │   ├── lib/
-│   │   ├── text.js              # Reusable message strings (welcome, help, about, stats)
-│   │   └── keyboards.js         # Reusable inline keyboards
-│   └── schema.js                # SQLite schema (users table)
+│   └── schema.js
 ├── docs/
-│   └── tgcloud-sdk.md           # Full SDK reference (auto-included by the scaffold)
-├── tgcloud.jsonc                # Project configuration
-├── AGENTS.md                    # Orientation for AI coding assistants
-├── package.json                 # Dev scripts + @tgcloud/cli
+│   ├── TELEGRAM_SERVERLESS_GUIDE.md
+│   ├── TERMINAL_DEPLOYMENT.md
+│   └── tgcloud-sdk.md
+├── Serena-Group-Manager/          # Independent group-management bot
+│   ├── tgcloud/
+│   │   ├── handlers/
+│   │   ├── lib/
+│   │   └── schema.js
+│   ├── package.json
+│   ├── README.md
+│   └── deployment termux.md
+├── tgcloud.jsonc
+├── package.json
 └── README.md
 ```
 
-Only `.js` files under `tgcloud/` (`schema.js`, `lib/`, `handlers/`, `endpoints/`)
-are deployed. Markdown, config, `node_modules`, and `.tgcloud/` stay local.
+## Core deployment rules
 
----
+1. `npx tgcloud login` links the **current project folder** to a bot and stores credentials in that folder's ignored `.tgcloud/` directory.
+2. `npx tgcloud status` and `npx tgcloud diff` help review local changes before deployment.
+3. `npx tgcloud push` deploys code. It does **not** apply database migrations.
+4. `npx tgcloud migrate` reviews and applies pending schema changes. Review potentially destructive changes carefully.
+5. The Serverless runtime is not ordinary Node.js: deployed modules use the platform SDK and project modules, not arbitrary npm packages or filesystem access.
+6. The bot runs on Telegram's infrastructure after deployment; Termux or another terminal does not need to remain open.
 
-## 🚀 Getting started
+## Security
 
-### Prerequisites
+- Keep `.tgcloud/`, bot tokens, CLI tokens and local `.env` files out of Git.
+- Never paste credentials into issues, chats, screenshots or committed files.
+- Grant group-management bots only the administrator permissions they actually need.
+- Review code and migration output before deploying to a live bot.
 
-- **Node.js 18+**
-- A Telegram bot registered with [@BotFather](https://t.me/BotFather).
-- **Early access to Telegram Serverless** — in @BotFather, open your bot →
-  **Serverless** → turn it on. You'll see the message quoted at the top of this
-  repo confirming early access.
+## References
 
-### 1. Clone & install
+- [Telegram Serverless documentation](https://blogfork.telegram.org/bots/serverless)
+- [Telegram Bot API](https://core.telegram.org/bots/api)
+- [BotFather](https://t.me/BotFather)
 
-```bash
-git clone https://github.com/<your-username>/<repo>.git
-cd <repo>
-npm install
-```
+## License
 
-### 2. Link the project to your bot
-
-The **CLI access token** is *separate* from your bot's HTTP API token. Get it
-from @BotFather → your bot → **Serverless** → **CLI Access** → **Access token**,
-then run:
-
-```bash
-npx tgcloud login
-```
-
-Paste the CLI token when prompted. It is saved locally in `.tgcloud/credentials`
-(which is gitignored — never commit it).
-
-> 💡 For CI you can set `TGCLOUD_TOKEN=<cli-token>` in the environment instead.
-
-### 3. Deploy
-
-```bash
-npx tgcloud push       # Upload your handler modules to the cloud
-npx tgcloud migrate    # Create the `users` table in the built-in database
-```
-
-That's it. Open your bot in Telegram, press **Start**, and you should see the
-welcome message with the main menu.
-
-### 4. Check status
-
-```bash
-npx tgcloud status     # Shows local vs. cloud revision
-npx tgcloud webhook    # Confirms the platform-managed webhook is wired up
-```
-
----
-
-## 🧪 Try it without deploying
-
-The `run` command executes a handler against your local files on the platform,
-without publishing them:
-
-```bash
-npx tgcloud run handlers/message '{ "chat": { "id": 123, "type": "private" }, "from": { "id": 123, "first_name": "Ada" }, "text": "/start" }'
-```
-
----
-
-## 🧩 Customising the bot
-
-| What to change              | Where                                   |
-|-----------------------------|-----------------------------------------|
-| Welcome / help / about text | [`tgcloud/lib/text.js`](tgcloud/lib/text.js) |
-| Inline buttons              | [`tgcloud/lib/keyboards.js`](tgcloud/lib/keyboards.js) |
-| Message routing & commands  | [`tgcloud/handlers/message.js`](tgcloud/handlers/message.js) |
-| Button-press handling       | [`tgcloud/handlers/callback_query.js`](tgcloud/handlers/callback_query.js) |
-| Database schema             | [`tgcloud/schema.js`](tgcloud/schema.js) |
-
-After changing the schema, run `npx tgcloud push` then `npx tgcloud migrate`.
-
-### Adding a new command
-
-1. Add a handler in `tgcloud/handlers/message.js` (see how `COMMANDS.help` is
-   defined) or register it in the `COMMANDS` map.
-2. If you want a button for it, add an entry in `tgcloud/lib/keyboards.js` and
-   wire the matching `action:` case in `handlers/callback_query.js`.
-3. `npx tgcloud push`.
-
----
-
-## 📚 Useful commands
-
-| Command                    | What it does                                       |
-|----------------------------|----------------------------------------------------|
-| `npm run push`             | Deploy changed modules to Telegram's cloud         |
-| `npm run migrate`          | Apply pending database schema changes              |
-| `npm run status`           | Show local vs. cloud revision                      |
-| `npm run diff`             | Line-by-line diff of local vs. cloud               |
-| `npx tgcloud run <module>` | Run a handler locally without deploying            |
-| `npx tgcloud webhook`      | Inspect / re-sync the platform-managed webhook     |
-| `npx tgcloud login`        | Link a different bot (saves a new CLI token)       |
-| `npx tgcloud pull`         | Restore local files from the cloud state           |
-
----
-
-## 🔒 Security notes
-
-- `.tgcloud/` is **gitignored**. It contains your CLI access token and local
-  state — never commit it.
-- The CLI access token is scoped to managing one bot; it is not your bot's HTTP
-  API token and can be rotated from @BotFather at any time.
-- The runtime has **no filesystem access** and **no npm packages** — only the
-  official `sdk` and your own modules under `tgcloud/`.
-
----
-
-## 📖 References
-
-- Telegram Serverless documentation: https://core.telegram.org/bots/serverless
-- Telegram Bot API reference: https://core.telegram.org/bots/api
-- Local SDK reference (full): [`docs/tgcloud-sdk.md`](docs/tgcloud-sdk.md)
-- Orientation for AI assistants: [`AGENTS.md`](AGENTS.md)
-- Feedback to Telegram: [@BotSupport](https://t.me/BotSupport) with `#serverless`
-
----
-
-## 📝 License
-
-MIT — see [`LICENSE`](LICENSE).
+MIT. See [LICENSE](LICENSE).
