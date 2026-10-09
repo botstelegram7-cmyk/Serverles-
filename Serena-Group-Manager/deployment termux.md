@@ -141,6 +141,8 @@ Telegram does not let bots moderate group administrators, and the bot cannot per
 ```text
 /start          Open the menu
 /help           Show all commands
+/version        Show bot version
+/status         Check bot permissions and settings
 /id             Show chat and user IDs
 /admins         List group administrators
 /rules          View group rules
