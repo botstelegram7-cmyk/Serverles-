@@ -14,6 +14,7 @@ import {
   HELP_TEXT,
   ABOUT_TEXT,
   statsMessage,
+  VERSION_TEXT,
   ECHO_PREFIX,
   escapeHtml,
 } from '../lib/text.js';
@@ -24,6 +25,7 @@ const COMMANDS = {
   help:  sendSimple(HELP_TEXT, backMenu),
   about: sendSimple(ABOUT_TEXT, backMenu),
   stats: handleStats,
+  version: sendSimple(VERSION_TEXT, backMenu),
 };
 
 export default async function (message, _ctx) {
@@ -35,29 +37,34 @@ export default async function (message, _ctx) {
   const text    = (message.text ?? '').trim();
   const isStart = isCommand(text, 'start');
 
-  // New users start with zero counted messages; /start preserves existing counts.
-  await db.insert(users)
-    .values({
-      tgId:       from.id,
-      firstName:  from.first_name ?? null,
-      lastName:   from.last_name ?? null,
-      username:   from.username ?? null,
-      language:   from.language_code ?? null,
-      lastSeenAt: new Date(),
-      messages:   isStart ? 0 : 1,
-    })
-    .onConflictDoUpdate({
-      target: users.tgId,
-      set: {
+  // Keep command replies working even if a database write fails.
+  try {
+    // New users start with zero counted messages; /start preserves existing counts.
+    await db.insert(users)
+      .values({
+        tgId:       from.id,
         firstName:  from.first_name ?? null,
         lastName:   from.last_name ?? null,
         username:   from.username ?? null,
         language:   from.language_code ?? null,
         lastSeenAt: new Date(),
-        messages:   isStart ? sql`${users.messages}` : sql`${users.messages} + 1`,
-      },
-    })
-    .run();
+        messages:   isStart ? 0 : 1,
+      })
+      .onConflictDoUpdate({
+        target: users.tgId,
+        set: {
+          firstName:  from.first_name ?? null,
+          lastName:   from.last_name ?? null,
+          username:   from.username ?? null,
+          language:   from.language_code ?? null,
+          lastSeenAt: new Date(),
+          messages:   isStart ? sql`${users.messages}` : sql`${users.messages} + 1`,
+        },
+      })
+      .run();
+  } catch (err) {
+    console.error('user tracking failed', err);
+  }
 
   if (text.startsWith('/')) {
     // Also accepts /start@BotName and commands with arguments.
