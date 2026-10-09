@@ -43,7 +43,7 @@ export const HELP_TEXT =
   '/purge [1-100] — Delete recent messages before the command\n' +
   '/pin — Pin the replied-to message\n' +
   '/unpin — Unpin the current pinned message\n' +
-  '/setrules <text> — Set the group rules\n' +
+  '/setrules &lt;text&gt; — Set the group rules\n' +
   '/welcome on|off — Toggle new-member welcome messages\n\n' +
   'The bot must be an administrator with the required permissions.';
 
