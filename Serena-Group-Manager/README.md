@@ -89,6 +89,23 @@ These commands are for group/supergroup administrators and require the bot to ha
 - Welcome messages depend on Telegram delivering the new-member service update.
 - The bot cannot bypass group restrictions or Telegram API limits.
 
+## Optional Telegram command menu
+
+To show common commands in Telegram's command menu, open @BotFather, use `/setcommands`, select Serena Group Manager's bot, and submit:
+
+```text
+start - Open the main menu
+help - Show all commands
+commands - Show all commands
+version - Show bot version
+status - Check bot permissions
+id - Show chat and user IDs
+admins - List group administrators
+rules - View group rules
+```
+
+This only configures the client-visible command suggestions; it does not grant permissions. Admin-only commands remain protected by the bot's runtime checks.
+
 ## Project structure
 
 ```text
