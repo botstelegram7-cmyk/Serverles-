@@ -38,6 +38,12 @@ export default async function (message) {
       return send(chat.id, HELP_TEXT, backMenu);
     }
 
+    if (command === 'version') {
+      return send(chat.id, '<b>ℹ️ Serena Group Manager</b>\\n<b>Version:</b> 1.0.0', backMenu);
+    }
+
+    if (command === 'status') return showStatus(message);
+
     if (command === 'id') {
       return send(chat.id,
         '<b>🆔 ID information</b>\n' +
@@ -280,6 +286,34 @@ async function pinRepliedMessage(message) {
 async function unpinMessage(message) {
   await api.unpinChatMessage({ chat_id: message.chat.id });
   return send(message.chat.id, '📌 The pinned message was unpinned.');
+}
+
+async function showStatus(message) {
+  const chatId = message.chat.id;
+  const me = await api.getMe();
+  const botMember = (message.chat.type === 'group' || message.chat.type === 'supergroup')
+    ? await api.getChatMember({ chat_id: chatId, user_id: me.id })
+    : null;
+  const settings = (message.chat.type === 'group' || message.chat.type === 'supergroup')
+    ? await getSettings(chatId)
+    : null;
+  const lines = [
+    '<b>🩺 Serena Group Manager status</b>',
+    '<b>Version:</b> 1.0.0',
+    '<b>Bot:</b> ' + escapeHtml(me.username ? '@' + me.username : me.first_name),
+  ];
+  if (botMember) {
+    lines.push('<b>Group role:</b> ' + escapeHtml(botMember.status));
+    if (botMember.status === 'administrator' || botMember.status === 'creator') {
+      lines.push('<b>Delete messages:</b> ' + (botMember.can_delete_messages ? '✅' : '❌'));
+      lines.push('<b>Restrict members:</b> ' + (botMember.can_restrict_members ? '✅' : '❌'));
+      lines.push('<b>Pin messages:</b> ' + (botMember.can_pin_messages ? '✅' : '❌'));
+    }
+    lines.push('<b>Welcome:</b> ' + (settings?.welcome === false ? 'OFF' : 'ON'));
+  } else {
+    lines.push('Add the bot to a group and promote it to admin to use moderation commands.');
+  }
+  return send(chatId, lines.join('\\n'), backMenu);
 }
 
 async function showAdmins(chatId) {
