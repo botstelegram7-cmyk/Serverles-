@@ -39,7 +39,7 @@ export default async function (message) {
     }
 
     if (command === 'version') {
-      return send(chat.id, '<b>ℹ️ Serena Group Manager</b>\\n<b>Version:</b> 1.0.0', backMenu);
+      return send(chat.id, '<b>ℹ️ Serena Group Manager</b>\n<b>Version:</b> 1.0.0', backMenu);
     }
 
     if (command === 'status') return showStatus(message);
