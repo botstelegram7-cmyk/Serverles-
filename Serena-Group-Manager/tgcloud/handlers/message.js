@@ -195,22 +195,24 @@ async function moderateTarget(message, action, args = []) {
   }
 
   if (action === 'unmute') {
+    const chatInfo = await api.getChat({ chat_id: chatId });
+    const defaultPermissions = chatInfo.permissions || {
+      can_send_messages: true,
+      can_send_audios: true,
+      can_send_documents: true,
+      can_send_photos: true,
+      can_send_videos: true,
+      can_send_video_notes: true,
+      can_send_voice_notes: true,
+      can_send_polls: true,
+      can_send_other_messages: true,
+      can_add_web_page_previews: true
+    };
     await api.restrictChatMember({
       chat_id: chatId,
       user_id: userId,
       use_independent_chat_permissions: true,
-      permissions: {
-        can_send_messages: true,
-        can_send_audios: true,
-        can_send_documents: true,
-        can_send_photos: true,
-        can_send_videos: true,
-        can_send_video_notes: true,
-        can_send_voice_notes: true,
-        can_send_polls: true,
-        can_send_other_messages: true,
-        can_add_web_page_previews: true
-      }
+      permissions: defaultPermissions
     });
     return send(chatId, '🔊 Sending permissions restored for ' + name + '.');
   }
@@ -366,7 +368,7 @@ async function setWelcome(message, value) {
   const enabled = normalized === 'on';
   await db.insert(groupSettings).values({
     chatId: message.chat.id,
-    rules: existing?.rules,
+    rules: existing?.rules ?? 'No rules have been set yet. An administrator can use /setrules to add them.',
     welcome: enabled,
     updatedAt: new Date(),
   }).onConflictDoUpdate({
