@@ -53,7 +53,12 @@ export default async function (message) {
         backMenu);
     }
 
-    if (command === 'admins') return showAdmins(chat.id);
+    if (command === 'admins') {
+      if (chat.type !== 'group' && chat.type !== 'supergroup') {
+        return send(chat.id, 'Add me to a group to view its administrators.', backMenu);
+      }
+      return showAdmins(chat.id);
+    }
     if (command === 'rules') return showRules(chat.id);
 
     if (!ADMIN_COMMANDS.has(command)) {
