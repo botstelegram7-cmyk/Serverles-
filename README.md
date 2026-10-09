@@ -1,5 +1,7 @@
 # Telegram Serverless Bot Projects
 
+[![Validate project files](https://github.com/botstelegram7-cmyk/Serverles-/actions/workflows/validate.yml/badge.svg)](https://github.com/botstelegram7-cmyk/Serverles-/actions/workflows/validate.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 Production-minded starter code and documentation for bots running on [Telegram Serverless](https://blogfork.telegram.org/bots/serverless) with the `@tgcloud/cli`.
 
 This repository contains **two independently deployable projects**. Each project has its own `package.json`, `tgcloud/` source tree, CLI state and deployment lifecycle.
