@@ -113,7 +113,25 @@ The Serverless runtime is not an ordinary Node.js server.
 
 Check [tgcloud-sdk.md](tgcloud-sdk.md) for exact signatures and examples.
 
-## 7. The built-in database
+## 7. Platform SDK capabilities
+
+The runtime SDK is imported from `sdk`; no separate SDK installation is required inside deployed handlers.
+
+| Capability | What it is for | Key notes |
+|---|---|---|
+| `api` | Telegram Bot API calls such as `sendMessage`, `editMessageText`, `getChatMember` and moderation methods | Pass Bot API parameter names in snake_case. API errors throw; handle expected errors. |
+| `db` / `sdk/db` | Persistent SQLite database and query builder | All query calls are asynchronous. Apply schema changes through `migrate`. |
+| `fetch` / `sdk/fetch` | Outbound HTTP requests from handlers/endpoints | Use this instead of assuming Node's networking globals or arbitrary packages. |
+| `InputFile` | Upload file bytes to Bot API methods | File upload and Bot API size limits apply; see the SDK reference. |
+| `BotApiError` | Inspect expected Bot API failures | Check documented error fields rather than parsing arbitrary strings. |
+| `console` | Runtime logging | Use for debugging; avoid logging tokens, private user data or secrets. |
+| `handlers/` | React to Telegram updates | One module per update type, default-exported handler. |
+| `endpoints/` | Mini App backend functions | The platform verifies Mini App init data and passes the caller context; follow official endpoint rules. |
+| Static hosting | Serve a Mini App build alongside the bot | Configure `static.source` in `tgcloud.jsonc` and build before pushing. |
+
+The exact current SDK signatures and limits are documented in [tgcloud-sdk.md](tgcloud-sdk.md) and the official Serverless guide.
+
+## 8. The built-in database
 
 Each bot has a persistent SQLite-backed database. Declare tables as named exports in `tgcloud/schema.js` and query them through `db`.
 
@@ -155,13 +173,13 @@ npx tgcloud migrate
 
 Do not delete schema declarations expecting that to automatically drop existing database objects. Follow the official migration guidance for deprecating or manually changing tables and columns.
 
-## 8. CLI commands
+## 9. CLI commands
 
 Run commands from the relevant project's root directory.
 
 | Command | Purpose |
 |---|---|
-| `npx tgcloud login` | Link the local project to a bot and save credentials locally |
+| `npx tgcloud init` | Scaffold a Serverless project in the current folder |\n| `npx tgcloud add handlers/message` | Scaffold a new handler or other supported module |\n| `npx tgcloud login` | Link the local project to a bot and save credentials locally |
 | `npx tgcloud status` | Show local changes compared with the last synced cloud state |
 | `npx tgcloud diff` | Show line-by-line module differences |
 | `npx tgcloud push` | Deploy project changes |
@@ -172,11 +190,11 @@ Run commands from the relevant project's root directory.
 | `npx tgcloud fetch` | Check deployed state without changing local files |
 | `npx tgcloud pull` | Bring local files in line with cloud state |
 | `npx tgcloud webhook` | Inspect or re-sync platform-managed webhook state |
-| `npx tgcloud upgrade` | Upgrade a project created with a pre-0.2.0 layout |
+| `npx tgcloud reset` | Discard local changes and restore the last synced cloud state — use cautiously |\n| `npx tgcloud completion` | Print shell completion instructions/script for supported shells |\n| `npx tgcloud upgrade` | Upgrade a project created with a pre-0.2.0 layout |\n| `npx tgcloud --help` | Show commands and options supported by your installed CLI version |
 
 The CLI version in the project determines which commands/options are available. If a command is rejected, run `npx tgcloud --help` and consult the current official docs rather than guessing flags.
 
-## 9. Recommended deployment workflow
+## 10. Recommended deployment workflow
 
 Use this sequence for routine updates:
 
@@ -206,7 +224,7 @@ npx tgcloud diff
 
 Review what changed before deploying. `npx tgcloud push --force` can overwrite newer cloud state; use it only when you deliberately intend to replace that state and have reviewed the consequences.
 
-## 10. Mini App hosting and endpoints
+## 11. Mini App hosting and endpoints
 
 A Mini App is optional. If a project includes a front-end, the front-end is built using its normal toolchain (for example Vite) and the build output can be hosted alongside the bot.
 
@@ -226,7 +244,7 @@ Build the front-end before deploying it. `npx tgcloud push` does not run the bui
 
 Files in `tgcloud/endpoints/` provide backend functions for Mini App calls. Consult the official guide for verified init data, endpoint semantics, hosting configuration and current platform limits.
 
-## 11. Authentication and secrets
+## 12. Authentication and secrets
 
 Interactive login:
 
@@ -249,7 +267,7 @@ unset TGCLOUD_TOKEN
 
 Use the interactive login when possible. Never share tokens in chats, issue reports, screenshots, or commits. If a token may have leaked, rotate/revoke it through the appropriate BotFather controls.
 
-## 12. Troubleshooting
+## 13. Troubleshooting
 
 ### “No CLI access token found”
 - Change into the intended project directory.
@@ -282,7 +300,7 @@ Use the interactive login when possible. Never share tokens in chats, issue repo
 - Do not manually edit `.tgcloud/` files. Re-run `npx tgcloud login` if necessary.
 - Never use `git clean -fdx` as a first troubleshooting step; it can delete local dependencies and ignored credentials.
 
-## 13. Official references
+## 14. Official references
 
 - [Telegram Serverless guide](https://blogfork.telegram.org/bots/serverless)
 - [Telegram Bot API](https://core.telegram.org/bots/api)
