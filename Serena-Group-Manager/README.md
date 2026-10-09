@@ -1,53 +1,128 @@
 # Serena Group Manager
 
-A practical Telegram group moderation bot for Telegram Serverless (tgcloud), built for easy setup from Android Termux.
+A Telegram group moderation bot built for Telegram Serverless using `@tgcloud/cli`. It is maintained as an independent project inside this repository.
 
 ## Features
 
-- Friendly /start menu with styled inline buttons
-- /help and /commands
-- /id — chat and user IDs
-- /admins — list current group admins
-- /rules and admin-only /setrules
-- Admin-only /welcome on|off
-- Reply-based /ban, /unban, /kick, /mute, /unmute
-- Reply-based /warn, /warnings, /clearwarns with persistent warning records
-- /purge [1-100] to remove recent messages
-- /pin and /unpin
-- Clear error messages for missing admin rights and invalid command use
-- Persistent group settings and warnings using the Serverless SQLite database
+- Button-based help menu with Telegram-supported inline button styles
+- Group administrator listing and chat/user ID lookup
+- Persistent group rules
+- New-member welcome messages with an on/off setting
+- Reply-based ban, unban, kick, mute and unmute commands
+- Persistent warning history, warning lookup and clearing
+- Purge up to 100 recent messages
+- Pin and unpin messages
+- Version and bot-permission status commands
+- SQLite-backed settings and warning records
+- Error messages when Telegram rejects an action or permissions are missing
 
-## Important Telegram setup
+> Telegram clients decide how inline button styles are rendered. The bot requests supported styles, but colours can differ on older clients.
 
-1. Create a bot with @BotFather and enable Telegram Serverless for it.
-2. Add the bot to your group.
-3. Promote it to administrator with the permissions it needs: delete messages, ban/restrict members, pin messages, and manage chat.
-4. To receive ordinary group messages for welcome/settings behaviour, review BotFather's Group Privacy setting. Commands and reply-based moderation are the primary supported workflow.
-5. Run the commands in [deployment termux.md](deployment%20termux.md).
+## Requirements
 
-## Command examples
+- Node.js 18+ and npm
+- Git
+- A bot created with @BotFather
+- Telegram Serverless enabled for that bot
+- The bot's **CLI Access token** from BotFather → your bot → Serverless → CLI Access
+- Administrator permissions in each group where moderation is required
 
-Reply to a member's message, then send:
-- `/warn Be respectful`
-- `/mute 10` — mute for 10 minutes
-- `/ban`
-- `/kick`
-- `/purge 10` — delete up to 10 recent messages before the command
-- `/setrules Be respectful. No spam or scams.`
+The CLI Access token is not the regular Bot API token. Do not share or commit it.
 
-Only Telegram group administrators can use moderation/settings commands. This bot does not bypass Telegram permissions; the bot itself must have the relevant admin rights.
+## First deployment
 
-## Button colours
+From the root of this repository:
 
-The inline menu uses Telegram's `style` values (`primary`, `success`, `danger`) where supported by Telegram clients. Button styling is controlled by Telegram and may appear differently on older clients.
+```bash
+cd Serena-Group-Manager
+npm install
+npx tgcloud login
+npx tgcloud status
+npx tgcloud push
+npx tgcloud migrate
+npx tgcloud webhook
+```
 
-## Project layout
+Review migration prompts before confirming. Each project has separate local `.tgcloud/` state; linking the Welcome Bot at the repository root does not link this subproject.
 
-- `tgcloud/handlers/message.js` — commands and moderation
-- `tgcloud/handlers/callback_query.js` — menu button actions
-- `tgcloud/schema.js` — persistent group settings and warning records
-- `deployment termux.md` — install, update, deploy, and redeploy instructions
+For Android Termux, Linux, macOS and Windows PowerShell, follow the detailed [deployment termux.md](deployment%20termux.md).
 
-## Safety
+## Commands
 
-Use this bot only in groups where you are authorized to moderate. Follow Telegram's rules and applicable law.
+### General commands
+
+| Command | Description |
+|---|---|
+| `/start`, `/menu` | Open the main menu |
+| `/help`, `/commands` | Show commands |
+| `/version` | Show bot version |
+| `/status` | Check bot identity, group role and relevant permissions |
+| `/id` | Show chat and your user ID |
+| `/admins` | List group administrators |
+| `/rules` | Show saved group rules |
+
+### Administrator commands
+
+These commands are for group/supergroup administrators and require the bot to have the relevant Telegram permission. Reply to a non-admin member's message for member-targeted commands.
+
+| Command | Usage |
+|---|---|
+| `/ban` | Reply to a member's message, then ban |
+| `/unban` | Reply to a message from the user, then remove their ban |
+| `/kick` | Reply to a member's message, then remove them |
+| `/mute 10` | Reply to a member's message, then mute for 10 minutes; defaults to 60 |
+| `/unmute` | Reply to a muted member's message, then restore the group's default permissions |
+| `/warn reason` | Reply to a member's message to record a warning |
+| `/warnings` | Reply to a member's message to view warning history |
+| `/clearwarns` | Reply to a member's message to clear warning history |
+| `/purge 10` | Delete up to 10 preceding messages (maximum 100) |
+| `/pin` | Reply to the message to pin |
+| `/unpin` | Unpin the current pinned message |
+| `/setrules Be respectful and do not spam.` | Save group rules |
+| `/welcome on` / `/welcome off` | Toggle welcome messages |
+
+### Important permission notes
+
+- Promote the bot to administrator and grant only the required permissions: delete messages, restrict/ban members, and pin messages.
+- Telegram does not let a bot moderate group owners or administrators.
+- `/purge` can only delete messages that Telegram allows the bot to delete.
+- Welcome messages depend on Telegram delivering the new-member service update.
+- The bot cannot bypass group restrictions or Telegram API limits.
+
+## Project structure
+
+```text
+Serena-Group-Manager/
+├── tgcloud/
+│   ├── handlers/
+│   │   ├── message.js
+│   │   └── callback_query.js
+│   ├── lib/
+│   │   └── ui.js
+│   └── schema.js
+├── package.json
+├── tgcloud.jsonc
+├── README.md
+└── deployment termux.md
+```
+
+Only runtime modules under the supported `tgcloud/` locations are deployed. Documentation, `package.json`, and local CLI state remain local.
+
+## Update and redeploy
+
+```bash
+git pull origin main
+cd Serena-Group-Manager
+npm install
+npx tgcloud status
+npx tgcloud diff
+npx tgcloud push
+npx tgcloud migrate
+npx tgcloud status
+```
+
+If you already are inside `Serena-Group-Manager`, run `git pull origin main` from the parent repository first, then return to this directory. See the deployment guide for exact commands for your terminal.
+
+## Security
+
+Never commit `.tgcloud/`, CLI tokens, Bot API tokens or private environment files. Before deploying moderation code to a live group, test in a private test group and confirm permissions and commands behave as expected.
