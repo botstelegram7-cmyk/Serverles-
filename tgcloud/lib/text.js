@@ -6,13 +6,13 @@ export function welcomeMessage(user) {
   const name = user?.first_name ? escapeHtml(user.first_name) : 'there';
   return (
     `👋 <b>Welcome, ${name}!</b>\n\n` +
-    `I'm a <b>Telegram Serverless</b> demo bot — I run entirely on Telegram's ` +
-    `infrastructure. No VPS, no containers, no webhooks to configure.\n\n` +
+    `I'm your helpful Telegram bot.\n\n` +
     `Here's what I can do right now:\n` +
     `  • /start — show this welcome message\n` +
     `  • /help  — learn what I understand\n` +
-    `  • /stats — see how many messages you've sent\n` +
-    `  • Say anything — I'll echo it back and keep a count\n\n` +
+    `  • /stats — see your message stats\n` +
+    `  • /version — show the current bot version\n` +
+    `  • Say anything — I'll echo it back\n\n` +
     `Tap a button below, or just send me a message. 🚀`
   );
 }
@@ -23,7 +23,8 @@ export const HELP_TEXT =
   `  /start — Welcome screen & main menu\n` +
   `  /help  — This help message\n` +
   `  /stats — Your personal message counter\n` +
-  `  /about — About Telegram Serverless\n\n` +
+  `  /about — About this bot\n` +
+  `  /version — Current bot version\n\n` +
   `<b>Buttons</b>\n` +
   `  The inline keyboard under the welcome message gives quick access\n` +
   `  to the most common actions.\n\n` +
@@ -32,15 +33,11 @@ export const HELP_TEXT =
   `  in my built-in SQLite database.`;
 
 export const ABOUT_TEXT =
-  `☁️ <b>About Telegram Serverless</b>\n\n` +
-  `This bot runs directly on Telegram's infrastructure in a fast V8 sandbox\n` +
-  `right next to the Bot API, with a built-in SQLite database.\n\n` +
-  `Deployment is a single command:\n` +
-  `<code>npx tgcloud push</code>\n\n` +
-  `📚 Docs: https://core.telegram.org/bots/serverless\n` +
-  `💬 Feedback: @BotSupport (use #serverless)`;
+  `🤖 <b>About this bot</b>\n\n` +
+  `I can show this welcome screen, explain commands, display your message stats,\n` +
+  `and echo text messages. Use /help to see the available commands.`;
 
-export function statsMessage(user, count) {
+export const VERSION_TEXT =\n  `ℹ️ <b>Bot version</b>\\n\\n` +\n  `<b>Version:</b> 1.0.0`;\n\nexport function statsMessage(user, count) {
   const name = user?.first_name ? escapeHtml(user.first_name) : 'You';
   return (
     `📊 <b>Your stats</b>\n\n` +
