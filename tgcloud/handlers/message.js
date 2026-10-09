@@ -27,24 +27,21 @@ const COMMANDS = {
 };
 
 export default async function (message, _ctx) {
-  // Ignore non-private chats to avoid noise in groups/channels.
   if (message.chat.type !== 'private') return;
-  // Ignore messages without a sender (e.g. channel posts forwarded as user).
   if (!message.from) return;
 
-  const chatId   = message.chat.id;
-  const from     = message.from;
-  const text     = (message.text ?? '').trim();
-  const isStart  = isCommand(text, 'start');
+  const chatId  = message.chat.id;
+  const from    = message.from;
+  const text    = (message.text ?? '').trim();
+  const isStart = isCommand(text, 'start');
 
-  // A new user starts with zero counted messages when they send /start.
-  // Existing users keep their current count on /start.
+  // New users start with zero counted messages; /start preserves existing counts.
   await db.insert(users)
     .values({
       tgId:       from.id,
       firstName:  from.first_name ?? null,
-      lastName:   from.last_name  ?? null,
-      username:   from.username   ?? null,
+      lastName:   from.last_name ?? null,
+      username:   from.username ?? null,
       language:   from.language_code ?? null,
       lastSeenAt: new Date(),
       messages:   isStart ? 0 : 1,
@@ -53,20 +50,18 @@ export default async function (message, _ctx) {
       target: users.tgId,
       set: {
         firstName:  from.first_name ?? null,
-        lastName:   from.last_name  ?? null,
-        username:  from.username   ?? null,
-        language:  from.language_code ?? null,
+        lastName:   from.last_name ?? null,
+        username:   from.username ?? null,
+        language:   from.language_code ?? null,
         lastSeenAt: new Date(),
-        messages:   isStart
-          ? sql`${users.messages}`
-          : sql`${users.messages} + 1`,
+        messages:   isStart ? sql`${users.messages}` : sql`${users.messages} + 1`,
       },
     })
     .run();
 
-  // Route commands.
   if (text.startsWith('/')) {
-    const cmd = text.slice(1).split(/\\s|@/)[0].toLowerCase();
+    // Also accepts /start@BotName and commands with arguments.
+    const cmd = text.slice(1).split(/\s|@/)[0].toLowerCase();
     const handler = COMMANDS[cmd];
     if (handler) return handler(chatId, from, message);
     return api.sendMessage({
@@ -77,7 +72,6 @@ export default async function (message, _ctx) {
     });
   }
 
-  // Default: echo.
   return api.sendMessage({
     chat_id: chatId,
     text: `${ECHO_PREFIX} <i>${escapeHtml(message.text ?? '(no text)')}</i>`,
@@ -85,10 +79,8 @@ export default async function (message, _ctx) {
   });
 }
 
-// ---------- command handlers ----------
-
 async function handleStart(chatId, from) {
-  await api.sendMessage({
+  return api.sendMessage({
     chat_id: chatId,
     text: welcomeMessage(from),
     parse_mode: 'HTML',
@@ -97,33 +89,32 @@ async function handleStart(chatId, from) {
   });
 }
 
-async function handleStats(chatId) {
+async function handleStats(chatId, from) {
   const row = await db.select({ messages: users.messages })
     .from(users)
-    .where(eq(users.tgId, chatId))
+    .where(eq(users.tgId, from.id))
     .get();
   const count = row?.messages ?? 0;
-  await api.sendMessage({
+  return api.sendMessage({
     chat_id: chatId,
-    text: statsMessage({ first_name: null }, count),
+    text: statsMessage(from, count),
     parse_mode: 'HTML',
     reply_markup: backMenu,
   });
 }
 
 function sendSimple(text, reply_markup) {
-  return (chatId, from) =>
-    api.sendMessage({
-      chat_id: chatId,
-      text,
-      parse_mode: 'HTML',
-      reply_markup,
-      disable_web_page_preview: true,
-    });
+  return (chatId) => api.sendMessage({
+    chat_id: chatId,
+    text,
+    parse_mode: 'HTML',
+    reply_markup,
+    disable_web_page_preview: true,
+  });
 }
 
 function isCommand(text, name) {
   if (!text.startsWith('/')) return false;
-  const cmd = text.slice(1).split(/\\s|@/)[0].toLowerCase();
+  const cmd = text.slice(1).split(/\s|@/)[0].toLowerCase();
   return cmd === name;
 }
