@@ -37,8 +37,8 @@ export default async function (message, _ctx) {
   const text     = (message.text ?? '').trim();
   const isStart  = isCommand(text, 'start');
 
-  // Always upsert the user. First-ever /start sets startedAt; subsequent
-  // messages just bump lastSeenAt and (for non-starts) the message count.
+  // A new user starts with zero counted messages when they send /start.
+  // Existing users keep their current count on /start.
   await db.insert(users)
     .values({
       tgId:       from.id,
@@ -47,18 +47,18 @@ export default async function (message, _ctx) {
       username:   from.username   ?? null,
       language:   from.language_code ?? null,
       lastSeenAt: new Date(),
-      messages:   isStart ? sql`${users.messages}` : 1, // count real messages, not commands
+      messages:   isStart ? 0 : 1,
     })
     .onConflictDoUpdate({
       target: users.tgId,
       set: {
         firstName:  from.first_name ?? null,
         lastName:   from.last_name  ?? null,
-        username:   from.username   ?? null,
-        language:   from.language_code ?? null,
+        username:  from.username   ?? null,
+        language:  from.language_code ?? null,
         lastSeenAt: new Date(),
         messages:   isStart
-          ? sql`${users.messages}`           // don't count /start
+          ? sql`${users.messages}`
           : sql`${users.messages} + 1`,
       },
     })
@@ -66,7 +66,7 @@ export default async function (message, _ctx) {
 
   // Route commands.
   if (text.startsWith('/')) {
-    const cmd = text.slice(1).split(/\s|@/)[0].toLowerCase();
+    const cmd = text.slice(1).split(/\\s|@/)[0].toLowerCase();
     const handler = COMMANDS[cmd];
     if (handler) return handler(chatId, from, message);
     return api.sendMessage({
@@ -124,6 +124,6 @@ function sendSimple(text, reply_markup) {
 
 function isCommand(text, name) {
   if (!text.startsWith('/')) return false;
-  const cmd = text.slice(1).split(/\s|@/)[0].toLowerCase();
+  const cmd = text.slice(1).split(/\\s|@/)[0].toLowerCase();
   return cmd === name;
 }
