@@ -187,7 +187,7 @@ npx tgcloud migrate
 Update later:
 
 ```powershell
-Set-Location ..\..
+Set-Location ..
 git pull origin main
 Set-Location .\Serena-Group-Manager
 npm install
