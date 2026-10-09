@@ -5,9 +5,18 @@ This file is auto-loaded by Claude Code, Cursor, and similar tools — keep it s
 and true. For the full SDK reference (db, Bot API, fetch), see
 [docs/tgcloud-sdk.md](docs/tgcloud-sdk.md).
 
-## What this project is
+## What this repository contains
 
-A **Telegram Mini App bot** running on Telegram's serverless platform. You write
+This repository has two independently deployable Telegram Serverless projects:
+
+- The Welcome Bot at the repository root (`tgcloud/`, root `package.json`).
+- Serena Group Manager in `Serena-Group-Manager/` with its own `tgcloud/`, `package.json`, and `.tgcloud/` state.
+
+Always run `tgcloud` commands from the project folder you intend to deploy. Do not assume the root project's login, schema, or cloud state applies to Serena Group Manager.
+
+## What the root project is
+
+A **Telegram bot / optional Mini App backend** running on Telegram's serverless platform. You write
 JavaScript modules (database schema, shared library code, update handlers); the
 platform runs them in a V8 isolate. The `tgcloud` CLI syncs this local project
 with the bot's cloud environment — think `wrangler`/`vercel` + `drizzle-kit`.
