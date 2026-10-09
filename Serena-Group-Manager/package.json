@@ -1,0 +1,23 @@
+{
+  "name": "serena-group-manager",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A Telegram Serverless group moderation bot with an easy menu and practical admin tools.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "deploy": "tgcloud push",
+    "push": "tgcloud push",
+    "migrate": "tgcloud migrate",
+    "status": "tgcloud status",
+    "diff": "tgcloud diff",
+    "run": "tgcloud run",
+    "webhook": "tgcloud webhook",
+    "login": "tgcloud login"
+  },
+  "devDependencies": {
+    "@tgcloud/cli": "^0.2.0"
+  }
+}
